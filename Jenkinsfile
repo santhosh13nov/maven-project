@@ -1,21 +1,22 @@
 pipeline {
-    agent any 
+    agent any
+    options {
+        timestamps()
+    }
     stages {
-        stage('Stage 1') {
+        stage('Clear working directory') {
             steps {
-                echo 'Hello world! stage1' 
+                ansiColor('xterm') {
+                    deleteDir()
+                }
             }
         }
-    stage('Stage 2') {
+        stage('Configure') {
             steps {
-                echo 'Hello world! stage2' 
+                ansiColor('xterm') {
+                    sh 'env > environment'
+                }
             }
         }
-    stage('Stage 3') {
-            steps {
-                echo 'Hello world! stage3' 
-            }
-        }       
     }
 }
-
