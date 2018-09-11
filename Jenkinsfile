@@ -1,22 +1,42 @@
 pipeline {
     agent any
-    options {
-        timestamps()
-    }
-    stages {
-        stage('Clear working directory') {
+    stages{
+        stage('Build'){
             steps {
-                ansiColor('xterm') {
-                    deleteDir()
+                sh 'mvn clean package'
+            }
+            post {
+                success {
+                    echo 'Now Archiving...'
+                    archiveArtifacts artifacts: '**/target/*.war'
                 }
             }
         }
-        stage('Configure') {
+        stage ('Deploy to Staging'){
             steps {
-                ansiColor('xterm') {
-                    sh 'env > environment'
+                build job: 'deploy-to-staging'
+            }
+        }
+
+        stage ('Deploy to Production'){
+            steps{
+                timeout(time:5, unit:'DAYS'){
+                    input message:'Approve PRODUCTION Deployment?'
+                }
+
+                build job: 'deploy-to-prod'
+            }
+            post {
+                success {
+                    echo 'Code deployed to Production.'
+                }
+
+                failure {
+                    echo ' Deployment failed.'
                 }
             }
         }
+
+
     }
 }
